@@ -1,0 +1,19 @@
+model:
+    type: None
+    save_path: out/model
+    parameters:
+          batch_size: 128
+          epochs: 1000
+          learning_rate: 0.001
+          beta_1: 0.9
+          beta_2: 0.999
+dataset:
+    path: ../dataset
+    num_class: 9
+feature_extraction:
+    min_note: 0
+    max_note: 127
+    features:
+data_augmentation:
+    sample_size: 300
+    num_samples_per_track: 100
