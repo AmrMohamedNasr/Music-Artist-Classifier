@@ -1,9 +1,11 @@
+import numpy as np
+
 def extract_pianoroll(conf, midis):
 	pianorolls = []
 	for i in midis:
 		midi_piano_roll = i.get_piano_roll(fs=10)
 		midi_piano_roll = midi_piano_roll[conf['feature_extraction']['min_note']:conf['feature_extraction']['max_note'] + 1,:]
-		pianorolls.append(midi_piano_roll)
+		pianorolls.append(np.reshape(midi_piano_roll, (midi_piano_roll.shape[0], midi_piano_roll.shape[1], 1)))
 	return pianorolls
 def extraction_functions():
 	extraction_functions = {}

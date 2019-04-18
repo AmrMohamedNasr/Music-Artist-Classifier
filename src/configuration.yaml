@@ -1,6 +1,6 @@
 model:
     type: None
-    save_path: out/model
+    save_path: ../out/model
     parameters:
           batch_size: 128
           epochs: 1000
@@ -8,8 +8,8 @@ model:
           beta_1: 0.9
           beta_2: 0.999
 dataset:
-    path: ../dataset
-    num_class: 9
+    raw_path: ../dataset
+    num_class: 10
 feature_extraction:
     min_note: 0
     max_note: 127

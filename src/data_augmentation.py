@@ -9,7 +9,7 @@ def sample_piano(piano_roll, sample_size, pref_num_samples):
 	sample_times = np.random.choice(possible_sample_times, num_samples, replace = False)
 	piano_rolls = []
 	for sample_time in sample_times:
-		piano_rolls.append(piano_roll[:, sample_time:sample_time + sample_size])
+		piano_rolls.append(piano_roll[:, sample_time:sample_time + sample_size, :])
 	return piano_rolls
 
 def sample_data(conf, piano_rolls, features):
@@ -31,7 +31,7 @@ def sample_data(conf, piano_rolls, features):
 			aug_features[i].extend(single_feature[i])
 	return aug_piano_rolls, aug_features
 
-def sample_prediction_data(conf, piano_rolls, feature):
+def sample_prediction_data(conf, piano_rolls, features):
 	aug_piano_rolls = []
 	aug_features = []
 	for feature in features:

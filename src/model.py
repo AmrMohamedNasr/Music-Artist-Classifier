@@ -14,7 +14,7 @@ def build_rnn(conf):
 	return None
 
 def build_dummy(conf):
-	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))
+	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
 	x = Conv2D(16, 3)(x0)
 	x = BatchNormalization()(x)
 	x = Activation('relu')(x)
@@ -45,7 +45,7 @@ def build_dummy(conf):
 	model = Model(inputs = x0, outputs = x)
 	return model
 
-def list_models_methods()
+def list_models_methods():
 	model_builders = {}
 	model_builders['cnn'] = build_cnn
 	model_builders['rnn'] = build_rnn
@@ -66,23 +66,26 @@ def build_model(conf):
 		print(model_name, ' is invalid')
 		print('Available models are ', list_model.keys())
 		exit()
-    parameters = conf['model']['parameters']
-    opt = Adam(lr=parameters['learning_rate'], beta_1=parameters['beta_1'], beta_2=parameters['beta_2'])
-    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    try:
-        model.load_weights(get_model_path(conf))
-        print('Loaded model from file.')
-    except:
-        print('Unable to load model from file.')
-    return model
+	parameters = conf['model']['parameters']
+	opt = Adam(lr=parameters['learning_rate'], beta_1=parameters['beta_1'], beta_2=parameters['beta_2'])
+	model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+	try:
+		model.load_weights(get_model_path(conf))
+		print('Loaded model from file.')
+	except:
+		print('Unable to load model from file.')
+	return model
 def train_model(conf, train_x, train_y, val_x, val_y, model):
 	parameters = conf['model']['parameters']
 	cbs = [
-        ModelCheckpoint(get_model_path(conf), monitor='loss', save_best_only=True, save_weights_only=True),
-        EarlyStopping(monitor='loss', patience=5)
-    ]
-    history = model.fit(train_data, train_labels, epochs=parameters['epochs'], validation_data=(val_x, val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
-    # Plot training & validation accuracy values
+		ModelCheckpoint(get_model_path(conf), monitor='loss', save_best_only=True, save_weights_only=True),
+		EarlyStopping(monitor='loss', patience=5)
+	]
+	if (len(train_x) == 1):
+		history = model.fit(train_x[0], train_y, epochs=parameters['epochs'], validation_data=(val_x[0], val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
+	else:
+		history = model.fit(train_x, train_y, epochs=parameters['epochs'], validation_data=(val_x, val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
+	# Plot training & validation accuracy values
 	plt.plot(history.history['acc'])
 	plt.plot(history.history['val_acc'])
 	plt.title('Model accuracy')
@@ -103,6 +106,6 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 def evaluate_model(conf, model, test_X, test_y):
 	test_loss, test_acc = model.evaluate(test_X, test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
 	print('Test loss:', test_loss)
-  	print('Test accuracy:', test_acc)
+	print('Test accuracy:', test_acc)
 def predict_model(conf, model, x):
 	return model.predict(x)

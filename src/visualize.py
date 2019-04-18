@@ -1,4 +1,5 @@
 from data_load import *
+from utils import *
 import matplotlib.pyplot as plt
 from collections import Counter
 import numpy as np
@@ -57,9 +58,52 @@ def single_track_time(midis, composers, un_composers):
 	plt.tight_layout()
 	plt.savefig('multi_track_time_histogram.jpg')
 	plt.show()
+def plot_bar_track_time_set(x, y, label, un_composers):
+	midi_files = {}
+	for i in un_composers:
+		midi_files[i] = 0
+	for i, j in zip(x, y):
+		index = np.where(j==1)[0][0]
+		midi_files[un_composers[index]] += i[0].shape[1]
+	plt.bar(range(len(midi_files)), list(midi_files.values()), align='center')
+	plt.xticks(range(len(midi_files)), list(midi_files.keys()), rotation=45)
+	plt.ylabel('Total time of tracks')
+	plt.xlabel('Composers')
+	plt.title('Total track time per composer in ' + label + ' set')
+	plt.tight_layout()
+	plt.savefig(label + '_total_time_per_composer.jpg')
+	plt.show()
+
+def plot_bar_sample_number_set(x, y, label, un_composers):
+	midi_files = {}
+	for i in un_composers:
+		midi_files[i] = 0
+	for i, j in zip(x, y):
+		index = np.where(j==1)[0][0]
+		midi_files[un_composers[index]] += 1
+	plt.bar(range(len(midi_files)), list(midi_files.values()), align='center')
+	plt.xticks(range(len(midi_files)), list(midi_files.keys()), rotation=45)
+	plt.ylabel('# of samples')
+	plt.xlabel('Composers')
+	plt.title('# of samples per composer in ' + label + ' set')
+	plt.tight_layout()
+	plt.savefig(label + '_samples_per_composer.jpg')
+	plt.show()
+
 def visualize(conf):
-	midis, composers, un_composers = read_dataset(conf['dataset']['path'])
+	midis, composers, un_composers = read_dataset(conf['dataset']['raw_path'])
+	x_train, x_test, x_val, y_train, y_test, y_val, x, y, un_composers, x_test_units, y_test_units = full_data_pipeline(conf)
 	tracks_per_composer(composers, un_composers)
 	total_track_time(midis, composers, un_composers)
 	hist_track_time(midis)
 	single_track_time(midis, composers, un_composers)
+	plot_bar_track_time_set(x, y, 'total', un_composers)
+	plot_bar_track_time_set(x_train, y_train, 'train', un_composers)
+	plot_bar_track_time_set(x_test, y_test, 'test', un_composers)
+	plot_bar_track_time_set(x_val, y_val, 'val', un_composers)
+	plot_bar_track_time_set(x_test_units, y_test_units, 'test_units', un_composers)
+	plot_bar_sample_number_set(x, y, 'total', un_composers)
+	plot_bar_sample_number_set(x_train, y_train, 'train', un_composers)
+	plot_bar_sample_number_set(x_test, y_test, 'test', un_composers)
+	plot_bar_sample_number_set(x_val, y_val, 'val', un_composers)
+	plot_bar_sample_number_set(x_test_units, y_test_units, 'test_units', un_composers)
