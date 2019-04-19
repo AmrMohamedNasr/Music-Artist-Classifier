@@ -16,4 +16,4 @@ feature_extraction:
     features:
 data_augmentation:
     sample_size: 300
-    num_samples_per_track: 100
+    num_samples_per_track: 50

@@ -90,13 +90,13 @@ def prediction_data_pipeline(conf, path):
 	piano_rolls, features = preprocess_midi_files(conf, [midi])
 	aug_piano_rolls, aug_features = sample_prediction_data(conf, piano_rolls, features)
 	x = []
-	x.append(piano_rolls)
+	x.append(aug_piano_rolls)
 	x.extend(aug_features)
 	return x
 
 def prediction_data(conf, piano_roll, feature):
-	aug_piano_rolls, aug_features = sample_prediction_data(conf, [piano_roll], [feature])
+	aug_piano_rolls, aug_features = sample_prediction_data(conf, piano_roll, feature)
 	x = []
-	x.append(piano_rolls)
+	x.append(aug_piano_rolls)
 	x.extend(aug_features)
 	return x

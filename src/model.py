@@ -4,7 +4,7 @@ from keras.optimizers import Adam
 from keras.models import Model, Sequential
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
 from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
-
+import matplotlib.pyplot as plt
 import os
 
 def build_cnn(conf):
@@ -104,8 +104,14 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 	plt.savefig('train_val_loss.png')
 	plt.show()
 def evaluate_model(conf, model, test_X, test_y):
-	test_loss, test_acc = model.evaluate(test_X, test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
+	if (len(test_X) == 1):
+		test_loss, test_acc = model.evaluate(test_X[0], test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
+	else:
+		test_loss, test_acc = model.evaluate(test_X, test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
 	print('Test loss:', test_loss)
 	print('Test accuracy:', test_acc)
 def predict_model(conf, model, x):
-	return model.predict(x)
+	if (len(x) == 1):
+		return model.predict(x[0], batch_size = conf['model']['parameters']['batch_size'])
+	else:
+		return model.predict(x, batch_size = conf['model']['parameters']['batch_size'])
