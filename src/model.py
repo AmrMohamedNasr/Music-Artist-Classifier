@@ -78,8 +78,8 @@ def build_model(conf):
 def train_model(conf, train_x, train_y, val_x, val_y, model):
 	parameters = conf['model']['parameters']
 	cbs = [
-		ModelCheckpoint(get_model_path(conf), monitor='loss', save_best_only=True, save_weights_only=True),
-		EarlyStopping(monitor='loss', patience=5)
+		ModelCheckpoint(get_model_path(conf), monitor='val_loss', save_best_only=True, save_weights_only=True),
+		EarlyStopping(monitor='val_loss', patience=5)
 	]
 	if (len(train_x) == 1):
 		history = model.fit(train_x[0], train_y, epochs=parameters['epochs'], validation_data=(val_x[0], val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
