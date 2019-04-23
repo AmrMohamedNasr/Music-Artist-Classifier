@@ -5,7 +5,11 @@ from data_augmentation import *
 from sklearn.model_selection import train_test_split
 import os
 import numpy as np
-
+'''
+combine_features function adds features to each pianoroll
+returns:
+combined_x -- combined pianoroll
+'''
 def combine_features(piano_roll, feature):
 	combined_x = []
 	for i in range(len(piano_roll)):
@@ -14,7 +18,12 @@ def combine_features(piano_roll, feature):
 		for j in range(len(feature)):
 			combined_x[i].append(feature[j][i])
 	return combined_x
-
+'''
+uncombine_features function divides combined pianoroll into pianoroll and features.
+returns:
+piano_roll -- pianoroll.
+features -- features of pianoroll.
+'''
 def uncombine_features(combined_x):
 	piano_roll = []
 	features = []
@@ -27,6 +36,13 @@ def uncombine_features(combined_x):
 			features[j].append(combined_x[i][j + 1])
 	return piano_roll, features
 
+'''
+full_data_pipeline function reads dataset and preprocess midi file,
+then dividing into train, test, validation sets after data augmentation and feature extraction,
+Finally return all sets with composers.
+arguments:
+conf -- configurations of project.  
+'''
 def full_data_pipeline(conf):
 	np.random.seed(1)
 	print('Reading raw data...')
@@ -52,6 +68,7 @@ def full_data_pipeline(conf):
 		print('Preprocessing composer ', un_composers[i], ' data')
 		piano_rolls, features = preprocess_midi_files(conf, midi_by_composer[i])
 		x_prelem = combine_features(piano_rolls, features)
+		# categorical to have one hot vector.
 		y_prelem = to_categorical([i] * len(piano_rolls), num_classes=conf['dataset']['num_class'])
 		x_prelem_train, x_composer_test, y_prelem_train, y_composer_test = train_test_split(x_prelem, y_prelem, test_size=0.15, random_state=1, shuffle = True)
 		test_rolls, test_features = uncombine_features(x_composer_test)
@@ -77,11 +94,26 @@ def full_data_pipeline(conf):
 		x_test_units.extend(x_composer_test_units)
 		y_test_units.extend(y_composer_test_units)
 	return x_train, x_test, x_val, y_train, y_test, y_val, x, y, un_composers, x_test_units, y_test_units
-
+'''
+preprocess_midi_files function extracts features and pianorolls
+arguments:
+conf -- configurations of project.
+midis -- midi files.
+returns:
+piano_rolls -- pianorolls
+features -- features of all pianoroll.
+'''
 def preprocess_midi_files(conf, midis):
 	piano_rolls, features = extract_features(conf, midis)
 	return piano_rolls, features
-
+'''
+prediction_data_pipeline function
+arguments:
+conf -- configurations of project.
+path -- path of midi file.
+returns:
+x -- augmented pianorolls and features
+'''
 def prediction_data_pipeline(conf, path):
 	midi = load_midi(path)
 	if (midi.get_piano_roll(fs=10).shape[1] < conf['data_augmentation']['sample_size']):
@@ -93,7 +125,15 @@ def prediction_data_pipeline(conf, path):
 	x.append(aug_piano_rolls)
 	x.extend(aug_features)
 	return x
-
+'''
+prediction_data function sampling prediction data return augmented data.
+arguments:
+conf -- configurations of project.
+piano_roll -- pianoroll.
+feature -- features of pianoroll.
+returns:
+x -- augmented pianorolls and features
+'''
 def prediction_data(conf, piano_roll, feature):
 	aug_piano_rolls, aug_features = sample_prediction_data(conf, piano_roll, feature)
 	x = []

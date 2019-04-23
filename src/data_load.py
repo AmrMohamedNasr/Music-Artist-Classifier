@@ -2,12 +2,24 @@ import os
 import pretty_midi
 import concurrent.futures
 import glob
-
+'''
+load_midi function loading midi file.
+arguments:
+path -- path of midi file.
+returns:
+midi -- midi data of track.
+'''
 def load_midi(path):
   midi = pretty_midi.PrettyMIDI(path)
   midi.remove_invalid_notes()
   return midi
-
+'''
+read_dataset function reads all dataset 
+returns:
+midi_files -- midi files.
+composers -- composer per each midi file.
+unique_composers -- all composers of dataset.
+'''
 def read_dataset(directory):
   composers = []
   midi_files = []
@@ -37,6 +49,9 @@ def read_dataset(directory):
   print('Different classes : ', unique_composers)
   return midi_files, composers, unique_composers
 
+ '''
+ filter_dataset function eliminate dataset that doesn't satisfy the sample size in configurations.
+ '''
 def filter_dataset(midis, composers, sample_size):
   for i in range(len(midis), 0, -1):
     if (midis[i - 1].get_piano_roll(fs=10).shape[1] < sample_size):
