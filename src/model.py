@@ -5,15 +5,10 @@ from keras.models import Model, Sequential
 from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
 from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
 import matplotlib.pyplot as plt
+import tensorflow as tf
 import os
 
 def build_cnn(conf):
-	return None
-
-def build_rnn(conf):
-	return None
-
-def build_dummy(conf):
 	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
 	x = Conv2D(16, 3)(x0)
 	x = BatchNormalization()(x)
@@ -45,6 +40,17 @@ def build_dummy(conf):
 	model = Model(inputs = x0, outputs = x)
 	return model
 
+def build_rnn(conf):
+	return None
+
+def build_dummy(conf):
+	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+	x = Flatten()(x0)
+	x = Dense(conf['dataset']['num_class'])(x)
+	x = Activation('softmax')(x)
+	model = Model(inputs = x0, outputs = x)
+	return model
+
 def list_models_methods():
 	model_builders = {}
 	model_builders['cnn'] = build_cnn
@@ -69,6 +75,18 @@ def build_model(conf):
 	parameters = conf['model']['parameters']
 	opt = Adam(lr=parameters['learning_rate'], beta_1=parameters['beta_1'], beta_2=parameters['beta_2'])
 	model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+	model.summary()
+	if (conf['model']['tpu']):
+		try:
+		    device_name = os.environ['COLAB_TPU_ADDR']
+		    TPU_ADDRESS = 'grpc://' + device_name
+		    print('Found TPU at: {}'.format(TPU_ADDRESS))
+		except KeyError:
+		    print('TPU not found')
+		model = tf.contrib.tpu.keras_to_tpu_model(
+		    model,
+		    strategy=tf.contrib.tpu.TPUDistributionStrategy(
+		        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
 	try:
 		model.load_weights(get_model_path(conf))
 		print('Loaded model from file.')
@@ -92,7 +110,7 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 	plt.ylabel('Accuracy')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig('train_val_acc.png')
+	plt.savefig(conf['model']['type'] + '_train_val_acc.png')
 	plt.show()
 	# Plot training & validation loss values
 	plt.plot(history.history['loss'])
@@ -101,7 +119,7 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 	plt.ylabel('Loss')
 	plt.xlabel('Epoch')
 	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig('train_val_loss.png')
+	plt.savefig(conf['model']['type'] + '_train_val_loss.png')
 	plt.show()
 def evaluate_model(conf, model, test_X, test_y):
 	if (len(test_X) == 1):

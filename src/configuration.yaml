@@ -1,9 +1,10 @@
 model:
     type: None
+    tpu: yes
     save_path: ../out/model
     parameters:
           batch_size: 128
-          epochs: 1000
+          epochs: 100
           learning_rate: 0.001
           beta_1: 0.9
           beta_2: 0.999
@@ -16,4 +17,4 @@ feature_extraction:
     features:
 data_augmentation:
     sample_size: 300
-    num_samples_per_track: 50
+    num_samples_per_track: 60

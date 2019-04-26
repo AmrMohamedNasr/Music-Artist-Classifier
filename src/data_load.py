@@ -48,10 +48,9 @@ def read_dataset(directory):
   print('Midi files loaded :', len(midi_files))
   print('Different classes : ', unique_composers)
   return midi_files, composers, unique_composers
-
- '''
- filter_dataset function eliminate dataset that doesn't satisfy the sample size in configurations.
- '''
+'''
+filter_dataset function eliminate dataset that doesn't satisfy the sample size in configurations.
+'''
 def filter_dataset(midis, composers, sample_size):
   for i in range(len(midis), 0, -1):
     if (midis[i - 1].get_piano_roll(fs=10).shape[1] < sample_size):
