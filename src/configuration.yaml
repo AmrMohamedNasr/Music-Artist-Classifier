@@ -9,6 +9,7 @@ model:
           beta_1: 0.9
           beta_2: 0.999
           dropout: 0.5
+          l2: 0.01
 dataset:
     raw_path: ../dataset
     num_class: 10
