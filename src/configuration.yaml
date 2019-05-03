@@ -1,6 +1,6 @@
 model:
     type: None
-    tpu: yes
+    tpu: no
     save_path: ../out/model
     parameters:
           batch_size: 128
@@ -8,6 +8,7 @@ model:
           learning_rate: 0.001
           beta_1: 0.9
           beta_2: 0.999
+          dropout: 0.5
 dataset:
     raw_path: ../dataset
     num_class: 10
