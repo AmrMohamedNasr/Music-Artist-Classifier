@@ -2,8 +2,9 @@ from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Dropout
-from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
+from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Dropout, LSTM
+from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D, Permute
+from tensorflow.keras.layers import Reshape
 from tensorflow.keras.regularizers import l1, l2
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -209,7 +210,14 @@ def build_big_cnn(conf):
   return model
 
 def build_rnn(conf):
-	return None
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
+  x = Permute((2, 1))(x)
+  x = LSTM(128, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
 
 def build_dummy(conf):
 	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
@@ -270,7 +278,7 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 	parameters = conf['model']['parameters']
 	cbs = [
 		ModelCheckpoint(get_model_path(conf), monitor='val_loss', save_best_only=True, save_weights_only=True),
-		EarlyStopping(monitor='val_loss', patience=5)
+		EarlyStopping(monitor='val_loss', patience=10)
 	]
 	if (len(train_x) == 1):
 		history = model.fit(train_x[0], train_y, epochs=parameters['epochs'], validation_data=(val_x[0], val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
