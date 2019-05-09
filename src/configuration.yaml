@@ -1,6 +1,6 @@
 model:
-    type: None
-    tpu: yes
+    type: cnn_0
+    tpu: no
     save_path: ../out/model
     parameters:
           batch_size: 128
