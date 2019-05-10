@@ -29,12 +29,16 @@ if __name__ == "__main__":
 			train(conf)
 		elif (args.mode == run_mode):
 			if (args.midi_path):
+				if (conf['model']['tpu']):
+					conf['model']['tpu'] = False
 				run(conf, args.midi_path)
 			else:
 				print('No midi file provided for prediction')
 		elif (args.mode == vis_mode):
 			visualize(conf)
 		elif (args.mode == eva_mode):
+			if (conf['model']['tpu']):
+				conf['model']['tpu'] = False
 			evaluate(conf)
 	else:
 		print('No specification over running mode ! run with -h flag for help')

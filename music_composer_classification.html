@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	  <style type="text/css">
+	  	.previous {
+			  background-color: #f1f1f1;
+			  color: black;
+			}
+			.round {
+			  border-radius: 50%;
+			}
+			a {
+			  text-decoration: none;
+			  display: inline-block;
+			  padding: 8px 16px;
+			}
+
+			a.text {
+			  text-decoration: none;
+			  display: inline;
+			  padding: 0px 0px;
+			}
+
+			a:hover {
+			  background-color: #ddd;
+			  color: black;
+			}
+			.tab { text-indent: 40px; }
+	  </style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+			<a href="home.html" class="previous round">&#8249;</a>
+	      <!-- <a class="navbar-brand" href="#">Deep Learning Course Projects</a> -->
+	    </div>
+	  </div>
+	</nav>
+	<div class="container-fluid">
+		<div class="text-center">
+			<h2>Music Composer Classification</h2>
+			<h5>Amr Mohamed Nasreldin Elsayed</h5>
+			<h5>Michael Raafat Mikhail Zaki</h5>
+		</div>
+		<h2>Problem Statment</h2>
+		<blockquote class="blockquote text-center">
+		  <p class="mb-0">Where words fail, music speaks.</p>
+		  <footer class="blockquote-footer">Hans Christian Andersen</footer>
+		</blockquote>
+		<p class="tab">
+			That’s why music is so interesting and why People love to listen to music coming from specific person.
+			We decided to classify music according to composers, we will receive the music and select the composer that most likely composed this music piece from 9 composers or a class of others. This problem is much harder than genre classification due to its complexity, however, logically its models can be generalized to help in other music classifications tasks.
+		</p>
+		<p class="tab">
+			Our project was based on the stanford project completed in fall 2018. This project report can be found <a class="text" href="http://cs230.stanford.edu/projects_fall_2018/reports/12441334.pdf">here</a>. Differences between our approaches are that we introduced a class of others that wasn't available in the original project, and that we classify on 30 second intervals only while they considered the interval size to classify to be a hyperparameter that can be tuned allowing them more flexibility.
+		</p>
+		<hr>
+		<h2>Input/ output Example</h2>
+		<p class="tab">
+			Our input is a midi file. A midi file, which contains tracks and chords represented as a tensor with dimensions of #tracks, #notes, #time which we will use in our models for classification. While we can take any midi files with the length of more than 30 seconds, our models work on classifying 30 seconds intervals of music. The input dimensions are 1 track, 128 musical note, and 30 second.
+		</p>
+		<p class="tab">
+			Our output is the label of the artist who composed this segment. It can be one of the following composers :
+			'chopin', 'bartok', 'hummel', 'mendelssohn', 'bach', 'byrd', 'handel', 'schumann', 'mozart' or 'other' if it doesn't match any composer.
+		</p>
+		<hr>
+		<h2>Gantt chart</h2>
+		<img src="images/gantt1.png" class="img-fluid" alt="Responsive image">
+		<img src="images/gantt2.png" class="img-fluid" alt="Responsive image">
+		<h2>Dataset</h2>
+		<p class="tab">
+			We obtained the original dataset from the original stanford report repository, which was a collection of 443 classical songs in midi formats for each of the 9 composers, with about 50 tracks per composer. However, we also added a collection of other midi files to represent the class of others in our project. We added 67 tracks to the dataset to represent our others class which included the work from composers such as Beethoven, Clementi and Haydn. These tracks were obtained from <a class="text" href="http://www.piano-midi.de/">here</a>.
+		</p>
+		<img src="images/track_time_histogram.jpg" class="img-fluid" alt="Responsive image">
+		<img src="images/multi_track_time_histogram.jpg" class="img-fluid" alt="Responsive image">
+		<img src="images/total_time_per_composer.jpg" class="img-fluid" alt="Responsive image">
+		<img src="images/tracks_per_composer.jpg" class="img-fluid" alt="Responsive image">
+		<p class="tab">
+			We can see from early exploration that while the number of tracks is almost balanced between different classes, the total time of the tracks is majorly unbalanced and would need to be balanced to obtain better results. We can also see that the tracks are not uniquely distributed in their length by a composer, and that most of our tracks will contain at least 30 second of music. Note that the track length is transformed to time by checking the sampling frequency. In our case the sampling frequency was 10, so each 10 track length units represent 1 second.  
+		</p>
+		<hr>
+		<h2>State of the art</h2>
+		<p class="tab">
+			The state of art performance reported in the original stanford report referenced in the problem statement section is 58% achived by a CNN architecture. 
+		</p>
+		<hr>
+		<h2>Data pre-processing(If Applies)</h2>
+		<ul>
+			<li>We used the pretty midi python library to parse and act as a wrapper to the midi files.</li>
+			<li>We extracted from each midi file its piano roll with a sample frequency of 10, the piano roll is a matrix representing the volume of each musical note across the different timesteps flattend across instruments.</li>
+			<li>We filtered any tracks that are less than 30 second.</li>
+			<li>We separated our dataset to training, validation and testing with 70%, 15% and 15% respectively.</li>
+			<li>We augmented the separated dataset using a window approach, taking multiple random windows of 30 second from each track(normally 60 from each track),which helped as balance the dataset since the tracks number were almost balanced already</li>
+		</ul>
+		<img src="images/total_total_time_per_composer.jpg" class="img-fluid" alt="Responsive image">
+		<img src="images/tracks_per_composer.jpg" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h2>Model(s) Used</h2>
+		<ul>
+			<li> Batch normalization was used after each layer</li>
+			<li> If dropout was applied, it was applied on the dense layers only</li>
+			<li> If L1 or L2 regularization was applied, it was applied on all layers</li>
+			<li> Input to Dense layers is always flattened before it goes to it</li>
+			<li> Default convolutional kernel size is 3x3</li>
+			<li> Adam optimizer with 0.001 learning rate, beta 1 with value 0.9 and beta 2 with value 0.999 were used as default optimizer</li>
+		</ul>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th colspan="1">None Model (Used to test pipeline)</th>
+			</tr>
+			<tr>
+				<th>Layer</th>
+			</tr>
+			<tr>
+				<td>Dense 10 unit with softmax activation</td>
+			</tr>
+		</table>
+		<hr>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th colspan="1">Pure_CNN Model</th>
+			</tr>
+			<tr>
+				<th>Layer</th>
+			</tr>
+			<tr>
+				<td>Conv2D with 16 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 32 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 64 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 128 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 256 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 512 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Dense 128 unit with relu activation</td>
+			</tr>
+			<tr>
+				<td>Dense 10 unit with softmax activation</td>
+			</tr>
+		</table>
+		<hr>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th colspan="1">Big_CNN Model</th>
+			</tr>
+			<tr>
+				<th>Layer</th>
+			</tr>
+			<tr>
+				<td>Conv2D with 16 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 32 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 64 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 128 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 256 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 512 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 1024 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 2048 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Dense 128 unit with relu activation</td>
+			</tr>
+			<tr>
+				<td>Dense 10 unit with softmax activation</td>
+			</tr>
+		</table>
+		<hr>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th colspan="1">Moderate_CNN Model</th>
+			</tr>
+			<tr>
+				<th>Layer</th>
+			</tr>
+			<tr>
+				<td>Conv2D with 16 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 32 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 64 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 128 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Conv2D with 256 filters with relu activation</td>
+			</tr>
+			<tr>
+				<td>Max pooling</td>
+			</tr>
+			<tr>
+				<td>Dense 128 unit with relu activation</td>
+			</tr>
+			<tr>
+				<td>Dense 10 unit with softmax activation</td>
+			</tr>
+		</table>
+		<hr>
+		<h2>Fine Tuning applied</h2>
+		<h4>CNN Models</h4>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th>Model</th>
+				<th>Train loss</th>
+				<th>Train accuracy</th>
+				<th>Validation loss</th>
+				<th>Validation accuracy</th>
+				<th>Notes</th>
+			</tr>
+			<tr>
+				<td>Pure_CNN Model</td>
+				<td>0.0015</td>
+				<td>99.99%</td>
+				<td>1.2615</td>
+				<td>76.80%</td>
+				<td>None</td>
+			</tr>
+			<tr>
+				<td>Pure_CNN Model</td>
+				<td>0.1959</td>
+				<td>93.75%</td>
+				<td>1.5233</td>
+				<td>67.48%</td>
+				<td>Dropout with probability 50%</td>
+			</tr>
+			<tr>
+				<td>Big_CNN Model</td>
+				<td>0.0233</td>
+				<td>99.36%</td>
+				<td>1.0968</td>
+				<td>73.88%</td>
+				<td>None</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>0.0839</td>
+				<td>98.18%</td>
+				<td>5.2852</td>
+				<td>24.81%</td>
+				<td>Dropout with probability 10%</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>10266.6516</td>
+				<td>34.22%</td>
+				<td>326612.1782</td>
+				<td>16.64%</td>
+				<td>L2 Regularization with 0.001 penalty</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>4.6925e-04</td>
+				<td>100%</td>
+				<td>1.0182</td>
+				<td>77.50%</td>
+				<td>Convolution kernel size changed to 5x5</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>2.1066e-04</td>
+				<td>100%</td>
+				<td>1.0730</td>
+				<td>77.79%</td>
+				<td>
+					<ul>
+						<li>Convolution kernel size changed to 5x5</li>
+						<li>Learning rate changed to 0.0008</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>0.0405</td>
+				<td>98.90%</td>
+				<td>2.7380</td>
+				<td>52.33%</td>
+				<td>
+					<ul>
+						<li>Convolution kernel size changed to 5x5</li>
+						<li>Dropout with probability 10%</li>
+					</ul>
+				</td>
+			</tr>
+		</table>
+		<p class = "tab"> 
+			Moderate_CNN Model with convolutional kernal sizes of 5x5 and learning rate changed to 0.0008 was chosen to be the model to be evaluated by our test set
+		</p>
+		<hr>
+		<h2>Results</h2>
+		<p class="tab">
+			We applied a voting technique to boost results, by taking multiple windows from each testing sample and checking the majority voting on the windows of a sample. We review our results by test accuracy on single segments and by checking accuracy on whole tracks by voting.
+		</p>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th>Model</th>
+				<th>Test loss (Segment)</th>
+				<th>Test accuracy (Segment)</th>
+				<th>Test loss (Voting)</th>
+				<th>Test accuracy (Voting)</th>
+			</tr>
+			<tr>
+				<td>None Model</td>
+				<td>12.670327808533246</td>
+				<td>20.684005732959151%</td>
+				<td>6.7333126</td>
+				<td>26.82927%</td>
+			</tr>
+			<tr>
+				<td>Moderate_CNN Model</td>
+				<td>0.9514614451127656</td>
+				<td>80.79268292682927%</td>
+				<td>0.6717078</td>
+				<td>90.2439%</td>
+			</tr>
+		</table>
+		<hr>
+	</div>
+</body>
+</html>

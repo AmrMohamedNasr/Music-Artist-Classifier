@@ -1,5 +1,9 @@
 model:
+<<<<<<< HEAD
     type: cnn_0
+=======
+    type: None
+>>>>>>> ba0719d72a35ac0e36a9d7af2bba8766b42cd2e8
     tpu: no
     save_path: ../out/model
     parameters:
@@ -8,6 +12,8 @@ model:
           learning_rate: 0.001
           beta_1: 0.9
           beta_2: 0.999
+          dropout: 0.5
+          l2: 0.01
 dataset:
     raw_path: ../dataset
     num_class: 10

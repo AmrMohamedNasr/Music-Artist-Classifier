@@ -1,15 +1,16 @@
-from keras.callbacks import ModelCheckpoint
-from keras.callbacks import EarlyStopping
-from keras.optimizers import Adam
-from keras.models import Model, Sequential
-from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, LSTM
-from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
-from keras.regularizers import l1, l2
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Dropout, LSTM
+from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D, Permute
+from tensorflow.keras.layers import Reshape
+from tensorflow.keras.regularizers import l1, l2
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import os
 
-def build_cnn(conf):
+def build_pure_cnn(conf):
 	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
 	x = Conv2D(16, 3, activity_regularizer=l1(0.001))(x0)
 	x = BatchNormalization()(x)
@@ -54,73 +55,179 @@ def build_cnn(conf):
 	x = Activation('softmax')(x)
 	model = Model(inputs = x0, outputs = x)
 	return model
-def build_cnn_0(conf):
-	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-	x = Conv2D(16, 3, activity_regularizer=l1(0.01))(x0)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = Conv2D(32, 3, activity_regularizer=l1(0.01))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = Dropout(0.2)(x)
-	x = BatchNormalization()(x)
-	x = MaxPooling2D()(x)
-	x = Conv2D(64, 3, activity_regularizer=l1(0.01))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = Conv2D(128, 3, activity_regularizer=l1(0.01))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = MaxPooling2D()(x)
-	x = Conv2D(256, 3, activity_regularizer=l1(0.01))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = Conv2D(512, 3, activity_regularizer=l1(0.01))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = MaxPooling2D()(x)
-	x = Flatten()(x)
-	x = Dense(128)(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = Dense(conf['dataset']['num_class'])(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.2)(x)
-	x = Activation('softmax')(x)
-	model = Model(inputs = x0, outputs = x)
-	return model
+
+def build_pure_cnn_drop(conf):
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Conv2D(16, 3)(x0)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(32, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(64, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(128, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(256, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(512, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Flatten()(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = Dense(128)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
+
+def build_moderate_cnn_drop(conf):
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Conv2D(16, 3)(x0)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = Conv2D(32, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(64, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = Conv2D(128, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(256, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = MaxPooling2D()(x)
+  x = Flatten()(x)
+  x = Dense(128)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dropout(conf['model']['parameters']['dropout'])(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
+
+def build_moderate_cnn_l2(conf):
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Conv2D(16, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x0)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(32, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(64, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(128, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(256, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Flatten()(x)
+  x = Dense(128)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
+
+def build_moderate_cnn(conf):
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Conv2D(16, 5)(x0)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(32, 5)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(64, 5)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(128, 5)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(256, 5)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Flatten()(x)
+  x = Dense(128)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
+
+def build_big_cnn(conf):
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Conv2D(16, 3)(x0)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(32, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(64, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(128, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(256, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Conv2D(512, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(1024, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Conv2D(2048, 3)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = MaxPooling2D()(x)
+  x = Flatten()(x)
+  x = Dense(128)(x)
+  x = BatchNormalization()(x)
+  x = Activation('relu')(x)
+  x = Dense(conf['dataset']['num_class'])(x)
+  x = Activation('softmax')(x)
+  model = Model(inputs = x0, outputs = x)
+  return model
+
 def build_rnn(conf):
-  x0 = Input(shape=(1, conf['data_augmentation']['sample_size'], conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, 1))
-  x = LSTM(64)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = LSTM(64)(x)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = LSTM(64)(x)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = BatchNormalization()(x)
-  x = LSTM(64)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = LSTM(64)(x)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = LSTM(64)(x)
-  x = BatchNormalization()(x)
-  x = Activation('tanh')(x)
-  x = BatchNormalization()(x)
+  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
+  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
+  x = Permute((2, 1))(x)
+  x = LSTM(128, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
   x = Dense(conf['dataset']['num_class'])(x)
   x = Activation('softmax')(x)
   model = Model(inputs = x0, outputs = x)
@@ -136,11 +243,17 @@ def build_dummy(conf):
 
 def list_models_methods():
 	model_builders = {}
-	model_builders['cnn'] = build_cnn
-	model_builders['cnn_0'] = build_cnn_0
-	model_builders['rnn'] = build_rnn
+	model_builders['cnn'] = build_pure_cnn
+	model_builders['cnn_drop'] = build_pure_cnn_drop
+	model_builders['mod_cnn'] = build_moderate_cnn
+	model_builders['mod_cnn_l2'] = build_moderate_cnn_l2
+	model_builders['mod_cnn_drop'] = build_moderate_cnn_drop
+	model_builders['big_cnn'] = build_big_cnn
+	model_builders['rnn_two_lstm'] = build_rnn_two_lstm
+	model_builders['rnn_dense_layers'] = build_rnn_dense_layers
 	model_builders['None'] = build_dummy
 	return model_builders
+
 
 def get_model_path(conf):
 	return conf['model']['save_path'] + conf['model']['type'] + '.h5'
@@ -157,7 +270,7 @@ def build_model(conf):
 		print('Available models are ', list_model.keys())
 		exit()
 	parameters = conf['model']['parameters']
-	opt = Adam(lr=parameters['learning_rate'], beta_1=parameters['beta_1'], beta_2=parameters['beta_2'])
+	opt = tf.train.AdamOptimizer(learning_rate=parameters['learning_rate'], beta1=parameters['beta_1'], beta2=parameters['beta_2'])
 	model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 	model.summary()
 	if (conf['model']['tpu']):
@@ -181,7 +294,7 @@ def train_model(conf, train_x, train_y, val_x, val_y, model):
 	parameters = conf['model']['parameters']
 	cbs = [
 		ModelCheckpoint(get_model_path(conf), monitor='val_loss', save_best_only=True, save_weights_only=True),
-		EarlyStopping(monitor='val_loss', patience=5)
+		EarlyStopping(monitor='val_loss', patience=10)
 	]
 	if (len(train_x) == 1):
 		history = model.fit(train_x[0], train_y, epochs=parameters['epochs'], validation_data=(val_x[0], val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
