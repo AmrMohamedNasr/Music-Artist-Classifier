@@ -251,6 +251,15 @@ def list_models_methods():
 	model_builders['big_cnn'] = build_big_cnn
 	model_builders['rnn_two_lstm'] = build_rnn_two_lstm
 	model_builders['rnn_dense_layers'] = build_rnn_dense_layers
+	model_builders['rnn_dense_layers1'] = build_rnn_dense_layers1
+	model_builders['rnn_dense_layers2'] = build_rnn_dense_layers2
+	model_builders['rnn_dense_layers3'] = build_rnn_dense_layers3
+	model_builders['rnn_dense_layers4'] = build_rnn_dense_layers4
+	model_builders['rnn_dense_layers33'] = build_rnn_dense_layers33
+	model_builders['rnn_dense_layers22'] = build_rnn_dense_layers22
+	model_builders['rnn_dense_layers11'] = build_rnn_dense_layers11
+	model_builders['rnn_dense_layers5'] = build_rnn_dense_layers5
+	model_builders['rnn_dense_layers11_Dropout'] = build_rnn_dense_layers11_Dropout
 	model_builders['None'] = build_dummy
 	return model_builders
 
