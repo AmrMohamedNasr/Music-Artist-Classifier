@@ -258,8 +258,10 @@ def list_models_methods():
     model_builders['mod_cnn_drop'] = build_moderate_cnn_drop
     model_builders['big_cnn'] = build_big_cnn
     model_builders['rnn'] = build_rnn
+    model_builders['hybrid'] = build_hybrid
     model_builders['None'] = build_dummy
     return model_builders
+
 
 def get_model_path(conf):
     return conf['model']['save_path'] + conf['model']['type'] + '.h5'
