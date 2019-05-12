@@ -4,7 +4,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Dropout, LSTM
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D, Permute
-from tensorflow.keras.layers import Reshape
+from tensorflow.keras.layers import Reshape, Conv1D, MaxPooling1D, GRU, TimeDistributed
+from keras.utils import plot_model
 from tensorflow.keras.regularizers import l1, l2
 import matplotlib.pyplot as plt
 import tensorflow as tf
@@ -460,28 +461,28 @@ def build_dummy(conf):
     return model
 
 def list_models_methods():
-	model_builders = {}
-	model_builders['cnn'] = build_pure_cnn
-	model_builders['cnn_drop'] = build_pure_cnn_drop
-	model_builders['mod_cnn'] = build_moderate_cnn
-	model_builders['mod_cnn_l2'] = build_moderate_cnn_l2
-	model_builders['mod_cnn_drop'] = build_moderate_cnn_drop
-	model_builders['big_cnn'] = build_big_cnn
-	model_builders['rnn_two_lstm'] = build_rnn_two_lstm
-	model_builders['rnn_dense_layers'] = build_rnn_dense_layers
-	model_builders['rnn_dense_layers1'] = build_rnn_dense_layers1
-	model_builders['rnn_dense_layers2'] = build_rnn_dense_layers2
-	model_builders['rnn_dense_layers3'] = build_rnn_dense_layers3
-	model_builders['rnn_dense_layers4'] = build_rnn_dense_layers4
-	model_builders['rnn_dense_layers33'] = build_rnn_dense_layers33
-	model_builders['rnn_dense_layers22'] = build_rnn_dense_layers22
-	model_builders['rnn_dense_layers11'] = build_rnn_dense_layers11
-	model_builders['rnn_dense_layers5'] = build_rnn_dense_layers5
-	model_builders['rnn_dense_layers11_Dropout'] = build_rnn_dense_layers11_Dropout
-	model_builders['rnn'] = build_rnn
+    model_builders = {}
+    model_builders['cnn'] = build_pure_cnn
+    model_builders['cnn_drop'] = build_pure_cnn_drop
+    model_builders['mod_cnn'] = build_moderate_cnn
+    model_builders['mod_cnn_l2'] = build_moderate_cnn_l2
+    model_builders['mod_cnn_drop'] = build_moderate_cnn_drop
+    model_builders['big_cnn'] = build_big_cnn
+    model_builders['rnn_two_lstm'] = build_rnn_two_lstm
+    model_builders['rnn_dense_layers'] = build_rnn_dense_layers
+    model_builders['rnn_dense_layers1'] = build_rnn_dense_layers1
+    model_builders['rnn_dense_layers2'] = build_rnn_dense_layers2
+    model_builders['rnn_dense_layers3'] = build_rnn_dense_layers3
+    model_builders['rnn_dense_layers4'] = build_rnn_dense_layers4
+    model_builders['rnn_dense_layers33'] = build_rnn_dense_layers33
+    model_builders['rnn_dense_layers22'] = build_rnn_dense_layers22
+    model_builders['rnn_dense_layers11'] = build_rnn_dense_layers11
+    model_builders['rnn_dense_layers5'] = build_rnn_dense_layers5
+    model_builders['rnn_dense_layers11_Dropout'] = build_rnn_dense_layers11_Dropout
+    model_builders['rnn'] = build_rnn
     model_builders['hybrid'] = build_hybrid
-	model_builders['None'] = build_dummy
-	return model_builders
+    model_builders['None'] = build_dummy
+    return model_builders
 
 
 
@@ -503,6 +504,7 @@ def build_model(conf):
     opt = tf.train.AdamOptimizer(learning_rate=parameters['learning_rate'], beta1=parameters['beta_1'], beta2=parameters['beta_2'])
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.summary()
+    plot_model(model, to_file='model.png')
     if (conf['model']['tpu']):
         try:
             device_name = os.environ['COLAB_TPU_ADDR']
