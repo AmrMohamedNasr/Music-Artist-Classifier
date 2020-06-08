@@ -1,542 +1,79 @@
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.models import Model, Sequential
-from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Dropout, LSTM, GRU
-from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D, Permute
-from tensorflow.keras.layers import Reshape
-from tensorflow.keras.regularizers import l1, l2
-import matplotlib.pyplot as plt
+from utils import *
+from model import *
+from keras.losses import categorical_crossentropy
+from keras.metrics import categorical_accuracy
+from keras import backend as K
 import tensorflow as tf
-import os
+import numpy as np
 
-def build_pure_cnn(conf):
-	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-	x = Conv2D(16, 3, activity_regularizer=l1(0.001))(x0)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = Conv2D(32, 3, activity_regularizer=l1(0.001))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = Dropout(0.1)(x)
-	x = BatchNormalization()(x)
-	x = MaxPooling2D()(x)
-	x = Conv2D(64, 3, activity_regularizer=l1(0.001))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = Conv2D(128, 3, activity_regularizer=l1(0.001))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = MaxPooling2D()(x)
-	x = Conv2D(256, 3, activity_regularizer=l1(0.001))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = Conv2D(512, 3, activity_regularizer=l1(0.001))(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = MaxPooling2D()(x)
-	x = Flatten()(x)
-	x = Dense(128)(x)
-	x = BatchNormalization()(x)
-	x = Activation('relu')(x)
-	x = Dense(conf['dataset']['num_class'])(x)
-	x = BatchNormalization()(x)
-	x = Dropout(0.1)(x)
-	x = Activation('softmax')(x)
-	model = Model(inputs = x0, outputs = x)
-	return model
-
-def build_pure_cnn_drop(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Conv2D(16, 3)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(32, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(64, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(128, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(256, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(512, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Flatten()(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Dense(128)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_moderate_cnn_drop(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Conv2D(16, 3)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Conv2D(32, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(64, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Conv2D(128, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(256, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = MaxPooling2D()(x)
-  x = Flatten()(x)
-  x = Dense(128)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_moderate_cnn_l2(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Conv2D(16, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x0)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(32, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(64, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(128, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(256, 3, activity_regularizer=l2(conf['model']['parameters']['l2']))(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Flatten()(x)
-  x = Dense(128)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_moderate_cnn(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Conv2D(16, 5)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(32, 5)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(64, 5)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(128, 5)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(256, 5)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Flatten()(x)
-  x = Dense(128)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_big_cnn(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Conv2D(16, 3)(x0)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(32, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(64, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(128, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(256, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Conv2D(512, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(1024, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Conv2D(2048, 3)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = MaxPooling2D()(x)
-  x = Flatten()(x)
-  x = Dense(128)(x)
-  x = BatchNormalization()(x)
-  x = Activation('relu')(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers1(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = LSTM(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers11(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers11_Dropout(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = LSTM(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  #x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(64)(x)
-  x = Activation('relu')(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers2(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = LSTM(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(512)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(64)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers22(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(512)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(64)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers3(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = LSTM(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(512)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers33(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(512)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(256)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers4(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(1024, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_rnn_dense_layers5(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = GRU(256, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = Dense(128)(x)
-  x = Activation('relu')(x)
-  x = Dropout(conf['model']['parameters']['dropout'])(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-
-def build_rnn_two_lstm(conf):
-  x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-  x = Reshape((conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size']))(x0)
-  x = Permute((2, 1))(x)
-  x = LSTM(128, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'], return_sequences=True)(x)
-  x = BatchNormalization()(x)
-  x = LSTM(64, dropout=conf['model']['parameters']['dropout'], recurrent_dropout=conf['model']['parameters']['dropout'])(x)
-  x = BatchNormalization()(x)
-  x = Dense(conf['dataset']['num_class'])(x)
-  x = Activation('softmax')(x)
-  model = Model(inputs = x0, outputs = x)
-  return model
-
-def build_dummy(conf):
-	x0 = Input(shape=(conf['feature_extraction']['max_note'] - conf['feature_extraction']['min_note'] + 1, conf['data_augmentation']['sample_size'], 1))
-	x = Flatten()(x0)
-	x = Dense(conf['dataset']['num_class'])(x)
-	x = Activation('softmax')(x)
-	model = Model(inputs = x0, outputs = x)
-	return model
-
-def list_models_methods():
-	model_builders = {}
-	model_builders['cnn'] = build_pure_cnn
-	model_builders['cnn_drop'] = build_pure_cnn_drop
-	model_builders['mod_cnn'] = build_moderate_cnn
-	model_builders['mod_cnn_l2'] = build_moderate_cnn_l2
-	model_builders['mod_cnn_drop'] = build_moderate_cnn_drop
-	model_builders['big_cnn'] = build_big_cnn
-	model_builders['rnn_two_lstm'] = build_rnn_two_lstm
-	model_builders['rnn_dense_layers'] = build_rnn_dense_layers
-	model_builders['rnn_dense_layers1'] = build_rnn_dense_layers1
-	model_builders['rnn_dense_layers2'] = build_rnn_dense_layers2
-	model_builders['rnn_dense_layers3'] = build_rnn_dense_layers3
-	model_builders['rnn_dense_layers4'] = build_rnn_dense_layers4
-	model_builders['rnn_dense_layers33'] = build_rnn_dense_layers33
-	model_builders['rnn_dense_layers22'] = build_rnn_dense_layers22
-	model_builders['rnn_dense_layers11'] = build_rnn_dense_layers11
-	model_builders['rnn_dense_layers5'] = build_rnn_dense_layers5
-	model_builders['rnn_dense_layers11_Dropout'] = build_rnn_dense_layers11_Dropout
-	model_builders['None'] = build_dummy
-	return model_builders
-
-def get_model_path(conf):
-	return conf['model']['save_path'] + conf['model']['type'] + '.h5'
-
-def build_model(conf):
-	os.makedirs(os.path.dirname(get_model_path(conf)), exist_ok=True)
-	list_model = list_models_methods()
-	model_name = conf['model']['type']
-	if (model_name in list_model):
-		model = list_model[model_name](conf)
-		print(model_name, ' model has been built')
-	else:
-		print(model_name, ' is invalid')
-		print('Available models are ', list_model.keys())
-		exit()
-	parameters = conf['model']['parameters']
-	opt = tf.train.AdamOptimizer(learning_rate=parameters['learning_rate'], beta1=parameters['beta_1'], beta2=parameters['beta_2'])
-	model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-	model.summary()
-	if (conf['model']['tpu']):
-		try:
-		    device_name = os.environ['COLAB_TPU_ADDR']
-		    TPU_ADDRESS = 'grpc://' + device_name
-		    print('Found TPU at: {}'.format(TPU_ADDRESS))
-		except KeyError:
-		    print('TPU not found')
-		model = tf.contrib.tpu.keras_to_tpu_model(
-		    model,
-		    strategy=tf.contrib.tpu.TPUDistributionStrategy(
-		        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
-	try:
-		model.load_weights(get_model_path(conf))
-		print('Loaded model from file.')
-	except:
-		print('Unable to load model from file.')
-	return model
-def train_model(conf, train_x, train_y, val_x, val_y, model):
-	parameters = conf['model']['parameters']
-	cbs = [
-		ModelCheckpoint(get_model_path(conf), monitor='val_loss', save_best_only=True, save_weights_only=True),
-		EarlyStopping(monitor='val_loss', patience=10)
-	]
-	if (len(train_x) == 1):
-		history = model.fit(train_x[0], train_y, epochs=parameters['epochs'], validation_data=(val_x[0], val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
-	else:
-		history = model.fit(train_x, train_y, epochs=parameters['epochs'], validation_data=(val_x, val_y), callbacks=cbs, batch_size=parameters['batch_size'], shuffle = True)
-	# Plot training & validation accuracy values
-	plt.plot(history.history['acc'])
-	plt.plot(history.history['val_acc'])
-	plt.title('Model accuracy')
-	plt.ylabel('Accuracy')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig(conf['model']['type'] + '_train_val_acc.png')
-	plt.show()
-	# Plot training & validation loss values
-	plt.plot(history.history['loss'])
-	plt.plot(history.history['val_loss'])
-	plt.title('Model loss')
-	plt.ylabel('Loss')
-	plt.xlabel('Epoch')
-	plt.legend(['Train', 'Test'], loc='upper left')
-	plt.savefig(conf['model']['type'] + '_train_val_loss.png')
-	plt.show()
-def evaluate_model(conf, model, test_X, test_y):
-	if (len(test_X) == 1):
-		test_loss, test_acc = model.evaluate(test_X[0], test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
-	else:
-		test_loss, test_acc = model.evaluate(test_X, test_y, verbose = 0, batch_size = conf['model']['parameters']['batch_size'])
-	print('Test loss:', test_loss)
-	print('Test accuracy:', test_acc)
-def predict_model(conf, model, x):
-	if (len(x) == 1):
-		return model.predict(x[0], batch_size = conf['model']['parameters']['batch_size'])
-	else:
-		return model.predict(x, batch_size = conf['model']['parameters']['batch_size'])
-
+def train(conf):
+	x_train, _, x_val, y_train, _, y_val, _, _, _, _, _ = full_data_pipeline(conf)
+	model = build_model(conf)
+	tr_rolls, tr_features = uncombine_features(x_train)
+	train_x = []
+	train_x.append(tr_rolls)
+	train_x.extend(tr_features)
+	vr_rolls, vr_features = uncombine_features(x_val)
+	val_x = []
+	val_x.append(vr_rolls)
+	val_x.extend(vr_features)
+	mod_train_x = []
+	mod_val_x = []
+	for feat in train_x:
+		mod_train_x.append(np.stack(feat))
+	for feat in val_x:
+		mod_val_x.append(np.stack(feat))
+	y_train = np.stack(y_train)
+	y_val = np.stack(y_val)
+	train_model(conf, mod_train_x, y_train, mod_val_x, y_val, model)
+def evaluate(conf):
+  _, x_test, _, _, y_test, _, _, _, _, x_test_units, y_test_units = full_data_pipeline(conf)
+  model = build_model(conf)
+  tu_rolls, tu_features = uncombine_features(x_test_units)
+  tu_x = []
+  tu_x.append(tu_rolls)
+  tu_x.extend(tu_features)
+  mod_tu_x = []
+  for feat in tu_x:
+    mod_tu_x.append(np.stack(feat))
+  tu_y = np.stack(y_test_units)
+  print('Single sample test results : ')
+  evaluate_model(conf, model, mod_tu_x, tu_y)
+  print('Full track test results : ')
+  pianos_s, feats_s = uncombine_features(x_test)
+  y_pred = []
+  for s in range(len(pianos_s)):
+    piano_s = []
+    piano_s.append(pianos_s[s])
+    feat_s = []
+    for ft in feats_s:
+      feat_s.append(ft[s])
+    x = prediction_data(conf, piano_s, feat_s)
+    mod_x = []
+    for feat in x:
+      mod_x.append(np.stack(feat))
+    y = predict_model(conf, model, mod_x)
+    y = np.argmax(y, axis = 1)
+    votes = np.bincount(y)
+    y_pred_s = np.zeros((conf['dataset']['num_class']))
+    for i in range(y_pred_s.shape[0]):
+      if (i < len(votes)):
+        y_pred_s[i] = votes[i]
+      else:
+        y_pred_s[i] = 0
+    y_pred_s = y_pred_s / np.sum(y_pred_s)
+    y_pred.append(y_pred_s)
+  y_test = np.stack(y_test)
+  y_pred = np.stack(y_pred)
+  y_test = y_test.astype('float32')
+  y_pred = y_pred.astype('float32')
+  y_true = K.constant(y_test)
+  y_pred = K.constant(y_pred)
+  loss = K.categorical_crossentropy(target=y_true, output=y_pred)
+  loss = K.eval(loss)
+  loss = np.mean(loss)
+  acc = categorical_accuracy(y_true, y_pred)
+  acc = K.eval(acc)
+  acc = np.mean(acc)
+  print('Test loss:', loss)
+  print('Test accuracy:', acc)

@@ -83,8 +83,10 @@
 		<hr>
 		<h2>State of the art</h2>
 		<p class="tab">
-			The state of art performance reported in the original stanford report referenced in the problem statement section is 58% achived by a CNN architecture. 
+			The state of art performance reported in the original stanford report referenced in the problem statement section is 58% achived by a CNN architecture.
+			Their other results can be found in the following image :
 		</p>
+		<img src="images/artState.png" class="img-fluid" alt="Responsive image">
 		<hr>
 		<h2>Data pre-processing(If Applies)</h2>
 		<ul>
@@ -105,153 +107,34 @@
 			<li> Input to Dense layers is always flattened before it goes to it</li>
 			<li> Default convolutional kernel size is 3x3</li>
 			<li> Adam optimizer with 0.001 learning rate, beta 1 with value 0.9 and beta 2 with value 0.999 were used as default optimizer</li>
+			<li> In hybrid models, default kernel size is 5x5 and default RNN unit is GRU</li>
 		</ul>
-		<table class = "table" style="width:75%">
-			<tr>
-				<th colspan="1">None Model (Used to test pipeline)</th>
-			</tr>
-			<tr>
-				<th>Layer</th>
-			</tr>
-			<tr>
-				<td>Dense 10 unit with softmax activation</td>
-			</tr>
-		</table>
+		<h4>None Model (Used to test pipeline)</h5>
+		<img src="images/None_Model.jpg" class="img-fluid" alt="Responsive image">
 		<hr>
-		<table class = "table" style="width:75%">
-			<tr>
-				<th colspan="1">Pure_CNN Model</th>
-			</tr>
-			<tr>
-				<th>Layer</th>
-			</tr>
-			<tr>
-				<td>Conv2D with 16 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 32 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 64 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 128 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 256 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 512 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Dense 128 unit with relu activation</td>
-			</tr>
-			<tr>
-				<td>Dense 10 unit with softmax activation</td>
-			</tr>
-		</table>
+		<h4>Pure CNN Model</h4>
+		<img src="images/Pure_cnn.png" class="img-fluid" alt="Responsive image">
 		<hr>
-		<table class = "table" style="width:75%">
-			<tr>
-				<th colspan="1">Big_CNN Model</th>
-			</tr>
-			<tr>
-				<th>Layer</th>
-			</tr>
-			<tr>
-				<td>Conv2D with 16 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 32 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 64 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 128 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 256 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 512 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 1024 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 2048 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Dense 128 unit with relu activation</td>
-			</tr>
-			<tr>
-				<td>Dense 10 unit with softmax activation</td>
-			</tr>
-		</table>
+		<h4>Big CNN Model</h4>
+		<img src="images/Big_cnn.png" class="img-fluid" alt="Responsive image">
 		<hr>
-		<table class = "table" style="width:75%">
-			<tr>
-				<th colspan="1">Moderate_CNN Model</th>
-			</tr>
-			<tr>
-				<th>Layer</th>
-			</tr>
-			<tr>
-				<td>Conv2D with 16 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 32 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 64 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 128 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Conv2D with 256 filters with relu activation</td>
-			</tr>
-			<tr>
-				<td>Max pooling</td>
-			</tr>
-			<tr>
-				<td>Dense 128 unit with relu activation</td>
-			</tr>
-			<tr>
-				<td>Dense 10 unit with softmax activation</td>
-			</tr>
-		</table>
+		<h4>Moderate CNN Model</h4>
+		<img src="images/Mod_cnn.png" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h4>RNN_1 Model</h4>
+		<img src="images/rnn_1l.png" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h4>RNN_2 Model</h4>
+		<img src="images/rnn_2l.png" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h4>RNN_3 Model</h4>
+		<img src="images/rnn_3l.png" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h4>Mini Hybrid Model</h4>
+		<img src="images/mini_hybrid.png" class="img-fluid" alt="Responsive image">
+		<hr>
+		<h4>Hybrid Model</h4>
+		<img src="images/hybrid_model.png" class="img-fluid" alt="Responsive image">
 		<hr>
 		<h2>Fine Tuning applied</h2>
 		<h4>CNN Models</h4>
@@ -314,10 +197,10 @@
 			</tr>
 			<tr>
 				<td>Moderate_CNN Model</td>
-				<td>2.1066e-04</td>
+				<td>1.2224e-05</td>
 				<td>100%</td>
-				<td>1.0730</td>
-				<td>77.79%</td>
+				<td>0.8231</td>
+				<td>83.98%</td>
 				<td>
 					<ul>
 						<li>Convolution kernel size changed to 5x5</li>
@@ -340,7 +223,192 @@
 			</tr>
 		</table>
 		<p class = "tab"> 
-			Moderate_CNN Model with convolutional kernal sizes of 5x5 and learning rate changed to 0.0008 was chosen to be the model to be evaluated by our test set
+			Moderate_CNN Model with convolutional kernal sizes of 5x5 and learning rate changed to 0.0008 was chosen to be the model to be evaluated by our test set.
+		</p>
+		<h4>RNN Models</h4>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th>Model</th>
+				<th>Train loss</th>
+				<th>Train accuracy</th>
+				<th>Validation loss</th>
+				<th>Validation accuracy</th>
+				<th>Notes</th>
+			</tr>
+			<tr>
+				<td>RNN_1 Model</td>
+				<td>0.0174</td>
+				<td>99.49%</td>
+				<td>2.3660</td>
+				<td>61.36%</td>
+				<td>GRU used</td>
+			</tr>
+			<tr>
+				<td>RNN_2 Model</td>
+				<td>0.0207</td>
+				<td>99.44%</td>
+				<td>1.7632</td>
+				<td>62.18%</td>
+				<td>GRU used</td>
+			</tr>
+			<tr>
+				<td>RNN_3 Model</td>
+				<td>0.0521</td>
+				<td>98.37%</td>
+				<td>2.0767</td>
+				<td>62.18%</td>
+				<td>GRU used</td>
+			</tr>
+			<tr>
+				<td>RNN_2 Model</td>
+				<td>0.0789</td>
+				<td>97.23%</td>
+				<td>2.1595</td>
+				<td>61.20%</td>
+				<td>LSTM used</td>
+			</tr>
+			<tr>
+				<td>RNN_1 Model</td>
+				<td>0.0841</td>
+				<td>97.19%</td>
+				<td>1.6974</td>
+				<td>68.31%</td>
+				<td>
+					<ul>
+						<li>GRU used</li>
+						<li>Dropout with probability 10%</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>RNN_3 Model</td>
+				<td>0.2709</td>
+				<td>91.15%</td>
+				<td>1.3123</td>
+				<td>68.02%</td>
+				<td>
+					<ul>
+						<li>GRU used</li>
+						<li>Dropout with probability 20%</li>
+					</ul>
+				</td>
+			</tr>
+		</table>
+		<p class = "tab"> 
+			RNN_1 Model with dropout of probability 10% and GRU used was chosen to be the model to be evaluated by our test set.
+		</p>
+		<h4>Hybrid Models</h4>
+		<table class = "table" style="width:75%">
+			<tr>
+				<th>Model</th>
+				<th>Train loss</th>
+				<th>Train accuracy</th>
+				<th>Validation loss</th>
+				<th>Validation accuracy</th>
+				<th>Notes</th>
+			</tr>
+			<tr>
+				<td>Mini Hybrid Model</td>
+				<td>0.1932</td>
+				<td>94.01%</td>
+				<td>1.4428</td>
+				<td>60.04%</td>
+				<td>Dropout with probability 25%</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.0709</td>
+				<td>98.19%</td>
+				<td>1.0648</td>
+				<td>73.40%</td>
+				<td>None</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.0955</td>
+				<td>97.42%</td>
+				<td>0.9987</td>
+				<td>70.81%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.0001</li>
+						<li>Dropout with probability 10%</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.2396</td>
+				<td>92.86%</td>
+				<td>0.7876</td>
+				<td>73.88%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.001</li>
+						<li>Dropout with probability 20%</li>
+						<li>Learning rate changed to 0.0007</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.1787</td>
+				<td>95.01%</td>
+				<td>0.8170</td>
+				<td>75.43%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.002</li>
+						<li>Dropout with probability 30%</li>
+						<li>Learning rate changed to 0.0001</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.1886</td>
+				<td>94.25%</td>
+				<td>0.8355</td>
+				<td>73.83%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.01</li>
+						<li>Dropout with probability 50%</li>
+						<li>Learning rate changed to 0.0007</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.0791</td>
+				<td>97.84%</td>
+				<td>0.9403</td>
+				<td>74.55%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.01</li>
+						<li>Dropout with probability 50%</li>
+						<li>Learning rate changed to 0.0006</li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.4406</td>
+				<td>85.09%</td>
+				<td>0.7659</td>
+				<td>73.86%</td>
+				<td>
+					<ul>
+						<li>L2 Regularization with penalty of 0.1</li>
+						<li>Dropout with probability 70%</li>
+						<li>Learning rate changed to 0.0004</li>
+					</ul>
+				</td>
+			</tr>
+		</table>
+		<p class = "tab"> 
+			Hybrid Model with dropout of probability 30% and L2 regularization with penalty 0.002 and learning rate of 0.0001 used was chosen to be the model to be evaluated by our test set.
 		</p>
 		<hr>
 		<h2>Results</h2>
@@ -363,11 +431,25 @@
 				<td>26.82927%</td>
 			</tr>
 			<tr>
-				<td>Moderate_CNN Model</td>
-				<td>0.9514614451127656</td>
-				<td>80.79268292682927%</td>
-				<td>0.6717078</td>
-				<td>90.2439%</td>
+				<td>Moderate CNN Model</td>
+				<td>0.9002239916546227</td>
+				<td>82.51186%</td>
+				<td>0.6482172</td>
+				<td>92.68293%</td>
+			</tr>
+			<tr>
+				<td>RNN_1 Model</td>
+				<td>1.5467208797829863</td>
+				<td>59.57709%</td>
+				<td>0.98850596</td>
+				<td>74.390244%</td>
+			</tr>
+			<tr>
+				<td>Hybrid Model</td>
+				<td>0.8626234033447513</td>
+				<td>73.1491%</td>
+				<td>1.182173</td>
+				<td>81.707317%</td>
 			</tr>
 		</table>
 		<hr>
